@@ -1,0 +1,264 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Packet Tracer - Enrutamiento de Red y Configuración VLANs</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="grupo4"
+                  title="Packet Tracer - Enrutamiento de Red y Configuración VLANs"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Introducción" duration="0">
+        <p>Esta guía detalla el proceso de configuración de una red de área local (LAN) utilizando tecnologías de VLAN y enrutamiento realizando una configuración router on a stick.</p>
+<p>La red consta de un router Cisco ISR4331 conectado a un switch Cisco 2960 al cual se conectan tres switches Cisco 2960. Estos dispositivos están interconectados formando una estructura que permite la segmentación de la red en diferentes subredes, cada una representada por una VLAN diferente. El router actúa como el dispositivo de enrutamiento para el tráfico entre estas VLANs, ya que este está configurado como router on a stick.</p>
+<p>El principal objetivo es configurar tres VLANs distintas para organizar los 150 dispositivos finales (PCs, impresoras y teléfonos) entre las distintas subredes, cada uno conectado a su propio switch.</p>
+<h2 is-upgraded><strong>Preparación de la Red</strong></h2>
+<p>Listado de Equipos y Dispositivos Necesarios</p>
+<ul>
+<li>1 Router Cisco ISR4331</li>
+<li>3 Switches Cisco 2960</li>
+<li>150 PCs o dispositivos finales</li>
+<li>Una Impresora para cada uno de los PCs</li>
+</ul>
+<h2 is-upgraded><strong>Descripción de la Topología Física y Lógica:</strong></h2>
+<p>Los switches están conectados al router mediante un switch que hace de mode trunk. Cada switch de cada subred alojará una VLAN individual que corresponde a un segmento de red diferente. En cada subred encontramos ordenadores, impresoras y teléfonos. El router está configurado con subinterfaces para manejar el tráfico entre estas VLANs a través de una única interfaz física.</p>
+<h2 is-upgraded><strong>Requisitos de Direccionamiento IP y Planificación de VLSM</strong></h2>
+<p>Mediante VLSM se asignarán de manera eficiente las direcciones IP a cada VLAN, maximizando el uso del espacio de direcciones disponible. Cada VLAN recibirá un bloque de 64 direcciones de basado en la cantidad de hosts que se esperan en cada segmento, sabemos que actualmente solo hay 50 equipos en cada subred, pero está previsto que pronto se incorporen nuevos trabajadores por ellos será suficiente con 64 direcciones para cada subred, ya que quedan libre 12 direcciones asignables.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configuración de VLANs en los Switches" duration="0">
+        <h2 is-upgraded><strong>Definir VLANs</strong></h2>
+<p>Primero, decidimos cuántas VLANs necesitamos y como denominaremos a cada una de ellas.</p>
+<p><strong>VLAN 10:</strong> Departamento de Administración A departamento A</p>
+<p><strong>VLAN 20:</strong> Departamento de Ventas A departamento B</p>
+<p><strong>VLAN 30:</strong> Departamento de IT A departamento C</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Planificar el Esquema de Direccionamiento (VLSM)" duration="0">
+        <p>Utilizaremos el esquema de direccionamiento VLSM para asignar bloques de direcciones IP a cada VLAN. Esto te permite utilizar el espacio de direcciones IP de manera eficiente.</p>
+<p>Realizamos el siguiente esquema de direccionamiento con la dirección red: 192.168.1.0 /24 para 3 subredes, y quedaría de la siguiente manera el reparto de direcciones:</p>
+<p class="image-container"><img src="img\\7a28c1ade1daf49c.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configurar VLANs en los Switches" duration="0">
+        <p>Para crear VLANs en cada switch planteadas anteriormente, utilizaremos los siguente comandos en cada uno de los switches de cada una de las tres subredes:</p>
+<p><strong>Switch 1:</strong></p>
+<pre><code>vlan 10
+
+name VLAN10
+
+exit
+</code></pre>
+<p><strong>Switch 2:</strong></p>
+<pre><code>vlan 20
+
+name VLAN20
+
+exit
+</code></pre>
+<p><strong>Switch 3:</strong></p>
+<pre><code>vlan 30
+
+name VLAN30
+
+exit
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Asignar Puertos a VLANs" duration="0">
+        <p><strong>Switch 1:</strong></p>
+<pre><code>interface range fa0/1 - 50
+
+switchport mode access
+
+switchport access vlan 10
+
+exit
+</code></pre>
+<p><strong>Switch 2:</strong></p>
+<pre><code>interface range fa0/1 - 50
+
+switchport mode access
+
+switchport access vlan 20
+
+exit
+</code></pre>
+<p><strong>Switch 3:</strong></p>
+<pre><code>interface range fa0/1 - 50
+
+switchport mode access
+
+switchport access vlan 20
+
+exit
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configuración de Trunk en los Switches" duration="0">
+        <p>En cada switch, identificamos el puerto que conecta al switch central y así configurar el modo trunk en el puerto de salida de cada switch de cada subred.</p>
+<p><strong>Switch 1:</strong></p>
+<pre><code>interface GigabitEthernet0/1
+
+switchport mode trunk
+
+switchport trunk allowed vlan 10
+
+exit
+</code></pre>
+<p><strong>Switch 2:</strong></p>
+<pre><code>interface GigabitEthernet0/1
+
+switchport mode trunk
+
+switchport trunk allowed vlan 20
+
+exit
+</code></pre>
+<p><strong>Switch 3:</strong></p>
+<pre><code>interface GigabitEthernet0/1
+
+switchport mode trunk
+
+switchport trunk allowed vlan 30
+
+exit
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configuración del Switch Central (Switch Trunk)" duration="0">
+        <p><strong>6.1. Crear las VLANs en el Switch Central:</strong></p>
+<p>Aunque este switch actuará como un enlace troncal, aun así necesita tener las VLANs definidas para que pueda entender y direccionar el tráfico de VLANs apropiadamente.</p>
+<pre><code>vlan 10 
+
+name departamentoA 
+
+exit 
+</code></pre>
+<pre><code>vlan 20 
+
+name departamentoB 
+
+exit 
+</code></pre>
+<pre><code>vlan 30 
+
+name departamentoC
+
+exit 
+</code></pre>
+<p><strong>6.2. Configurar los puertos que se conectan a los switches de acceso como Trunk:</strong> Los puertos Fa0/1, Fa0/2, Fa0/3 del switch central, se conectan al switch de cada subred. Por tanto, estableceremos los siguientes comandos:</p>
+<pre><code>interface range GigabitEthernet0/1 - 3 
+
+switchport trunk encapsulation dot1q 
+
+switchport mode trunk 
+
+switchport trunk allowed vlan 10
+
+switchport trunk allowed vlan 20
+
+switchport trunk allowed vlan 30 
+
+exit 
+</code></pre>
+<p><strong>6.3.  Configurar el puerto que se conecta al router como Trunk:</strong></p>
+<p>El puerto GigabitEthernet0/1 del switch se conecta al router, este también será necesario configurarlo como Trunk.</p>
+<pre><code>interface GigabitEthernet0/0 
+
+switchport trunk encapsulation dot1q 
+
+switchport mode trunk 
+
+switchport trunk allowed vlan 10
+
+switchport trunk allowed vlan 20
+
+switchport trunk allowed vlan 30 
+
+exit 
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configuración Router-On-A-Stick" duration="0">
+        <pre><code>interface gigabitethernet 0/0/0
+
+no shutdown
+
+interface GigabitEthernet0/0.10
+
+encapsulation dot1Q 10
+
+ip address 192.168.1.1 255.255.255.192
+
+no shutdown
+
+exit
+</code></pre>
+<pre><code>interface GigabitEthernet0/0.20
+
+encapsulation dot1Q 20
+
+ip address 192.168.1.65 255.255.255.192
+
+no shutdown
+
+exit
+</code></pre>
+<pre><code>interface GigabitEthernet0/0.30
+
+encapsulation dot1Q 30
+
+ip address 192.168.1.129 255.255.255.192
+
+no shutdown
+
+exit
+</code></pre>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

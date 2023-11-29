@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2023-11-29T18:32:47+01:00",
+  "id": "grupo4",
+  "duration": 0,
+  "title": "Packet Tracer - Enrutamiento de Red y Configuración VLANs",
+  "summary": "Proyecto 2",
+  "source": "proyecto2_grupo4.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "codelab",
+    "markdown"
+  ],
+  "tags": [
+    "web"
+  ],
+  "url": "grupo4"
+}
